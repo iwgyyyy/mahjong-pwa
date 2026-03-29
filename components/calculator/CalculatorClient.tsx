@@ -326,7 +326,7 @@ export function CalculatorClient() {
               <Button asChild variant="outline">
                 <Link href="/">返回首页</Link>
               </Button>
-              <Button type="button" variant="secondary" onClick={() => setState(DEFAULT_STATE)}>
+              <Button type="button" onClick={() => setState(DEFAULT_STATE)}>
                 清空当前输入
               </Button>
             </div>
