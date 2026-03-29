@@ -7,9 +7,9 @@
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-sans);
-  --font-mono: var(--font-geist-mono);
-  --font-heading: var(--font-sans);
+  --font-sans: "Avenir Next", "PingFang SC", "Noto Sans SC", "Microsoft YaHei", sans-serif;
+  --font-mono: "SFMono-Regular", "JetBrains Mono", "Menlo", monospace;
+  --font-heading: "Iowan Old Style", "Source Han Serif SC", "Noto Serif SC", serif;
   --color-sidebar-ring: var(--sidebar-ring);
   --color-sidebar-border: var(--sidebar-border);
   --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
@@ -49,24 +49,24 @@
 }
 
 :root {
-  --background: oklch(1 0 0);
-  --foreground: oklch(0.145 0 0);
-  --card: oklch(1 0 0);
-  --card-foreground: oklch(0.145 0 0);
-  --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.145 0 0);
-  --primary: oklch(0.205 0 0);
-  --primary-foreground: oklch(0.985 0 0);
-  --secondary: oklch(0.97 0 0);
-  --secondary-foreground: oklch(0.205 0 0);
-  --muted: oklch(0.97 0 0);
-  --muted-foreground: oklch(0.556 0 0);
-  --accent: oklch(0.97 0 0);
-  --accent-foreground: oklch(0.205 0 0);
-  --destructive: oklch(0.577 0.245 27.325);
-  --border: oklch(0.922 0 0);
-  --input: oklch(0.922 0 0);
-  --ring: oklch(0.708 0 0);
+  --background: oklch(0.97 0.015 96.3);
+  --foreground: oklch(0.28 0.018 70.2);
+  --card: oklch(0.992 0.008 91.4);
+  --card-foreground: oklch(0.28 0.018 70.2);
+  --popover: oklch(0.992 0.008 91.4);
+  --popover-foreground: oklch(0.28 0.018 70.2);
+  --primary: oklch(0.43 0.07 172);
+  --primary-foreground: oklch(0.98 0.01 95);
+  --secondary: oklch(0.93 0.028 151);
+  --secondary-foreground: oklch(0.29 0.023 164);
+  --muted: oklch(0.94 0.008 95.6);
+  --muted-foreground: oklch(0.53 0.014 73.1);
+  --accent: oklch(0.9 0.025 84.5);
+  --accent-foreground: oklch(0.34 0.024 70.8);
+  --destructive: oklch(0.56 0.19 28);
+  --border: oklch(0.86 0.015 89.5);
+  --input: oklch(0.86 0.015 89.5);
+  --ring: oklch(0.52 0.05 173);
   --chart-1: oklch(0.87 0 0);
   --chart-2: oklch(0.556 0 0);
   --chart-3: oklch(0.439 0 0);
@@ -123,8 +123,36 @@
   }
   body {
     @apply bg-background text-foreground;
+    background-image:
+      radial-gradient(circle at top left, color-mix(in oklab, var(--color-primary) 18%, transparent) 0, transparent 36%),
+      radial-gradient(circle at bottom right, color-mix(in oklab, var(--color-accent) 60%, transparent) 0, transparent 42%),
+      linear-gradient(180deg, color-mix(in oklab, var(--color-card) 80%, white) 0%, var(--color-background) 100%);
   }
   html {
     @apply font-sans;
   }
+  html,
+  body {
+    width: 100%;
+    overflow-x: hidden;
+  }
+}
+
+@utility app-shell {
+  background:
+    linear-gradient(135deg, color-mix(in oklab, var(--color-background) 92%, white) 0%, var(--color-muted) 100%);
+}
+
+@utility panel-surface {
+  background:
+    linear-gradient(180deg, color-mix(in oklab, var(--color-card) 92%, white) 0%, color-mix(in oklab, var(--color-card) 72%, var(--color-accent)) 100%);
+}
+
+@utility tile-surface {
+  background:
+    linear-gradient(180deg, color-mix(in oklab, white 88%, var(--color-card)) 0%, color-mix(in oklab, var(--color-card) 84%, var(--color-accent)) 100%);
+}
+
+@utility keyboard-shadow {
+  box-shadow: 0 18px 48px color-mix(in oklab, var(--color-foreground) 12%, transparent);
 }
