@@ -134,6 +134,8 @@ export function GameConditions({
               const disabled =
                 (riichiLocked && (item.key === "riichi" || item.key === "doubleRiichi" || item.key === "ippatsu")) ||
                 (item.key === "ippatsu" && !conditions.special.riichi && !conditions.special.doubleRiichi) ||
+                (item.key === "rinshan" && method !== "tsumo") ||
+                (item.key === "chankan" && method !== "ron") ||
                 (item.key === "haitei" && method !== "tsumo") ||
                 (item.key === "houtei" && method !== "ron");
 
@@ -242,6 +244,7 @@ export function GameConditions({
               type="button"
               variant={conditions.special.tenho ? "default" : "outline"}
               onClick={() => onSpecialToggle("tenho")}
+              disabled={!isMenzen || method !== "tsumo" || !conditions.isDealer}
             >
               天和
             </Button>
@@ -249,6 +252,7 @@ export function GameConditions({
               type="button"
               variant={conditions.special.chiho ? "default" : "outline"}
               onClick={() => onSpecialToggle("chiho")}
+              disabled={!isMenzen || method !== "tsumo" || conditions.isDealer}
             >
               地和
             </Button>

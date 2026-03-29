@@ -16,7 +16,8 @@ import { WinningTile } from "@/components/calculator/WinningTile";
 import { TileKeyboard } from "@/components/calculator/TileKeyboard";
 import { GameConditions } from "@/components/calculator/GameConditions";
 import { ResultPanel } from "@/components/calculator/ResultPanel";
-import { buildCalculationSummary, getHandLimit, getUsedTileCounts } from "@/lib/mahjong/calculator";
+import { buildCalculationSummary, getHandLimit, getSelectedTileTotal, getUsedTileCounts } from "@/lib/mahjong/calculator";
+import { isMenzenHand } from "@/lib/mahjong/state";
 import { DEFAULT_STATE, TILE_ORDER, type CalculatorState, type MeldType, type TileCode, type Wind } from "@/lib/mahjong/types";
 
 const TILE_INDEX = new Map(TILE_ORDER.map((tile, index) => [tile, index]));
@@ -63,8 +64,25 @@ export function CalculatorClient() {
   }
 
   const handLimit = getHandLimit(state.melds);
+  const selectedTileTotal = getSelectedTileTotal(state);
   const summary = buildCalculationSummary(state);
-  const isMenzen = state.melds.length === 0;
+  const resultAlerts = [
+    !state.doraIndicators.some((tile) => tile !== null)
+      ? {
+          title: "请先选择宝牌指示牌",
+          description: "当前还没有录入宝牌指示牌。为了让番数结果完整，请先选择至少 1 张宝牌指示牌。",
+        }
+      : null,
+    state.conditions.special.riichi || state.conditions.special.doubleRiichi
+      ? !state.uraDoraIndicators.some((tile) => tile !== null)
+        ? {
+            title: "请先选择里宝牌指示牌",
+            description: "当前已勾选立直或双立直，但还没有录入里宝牌指示牌。为了让番数结果完整，请先选择至少 1 张里宝牌指示牌。",
+          }
+        : null
+      : null,
+  ].filter((item): item is { title: string; description: string } => item !== null);
+  const isMenzen = isMenzenHand(state.melds);
   const activeMeldId = state.activeArea.type === "meld" ? state.activeArea.meldId : null;
   const activeDoraSlot = state.activeArea.type === "dora" ? state.activeArea : null;
   const requiredTileCount =
@@ -134,6 +152,10 @@ export function CalculatorClient() {
   }
 
   function createMeld(type: MeldType) {
+    if (selectedTileTotal > 10 && !state.pendingMeldType) {
+      return;
+    }
+
     const id = makeMeldId();
     setPendingChiTiles([]);
 
@@ -170,17 +192,17 @@ export function CalculatorClient() {
   }
 
   function handleTilePick(tile: TileCode) {
-    if (state.activeArea.type !== "dora" && (remainingMap.get(tile) ?? 4) < requiredTileCount) {
+    if ((remainingMap.get(tile) ?? 4) < requiredTileCount) {
       return;
     }
 
-    if (state.activeArea.type === "meld" && isMobileViewport()) {
+    if (state.activeArea.type === "meld" && isMobileViewport() && state.pendingMeldType !== "chi") {
       closeMobileKeyboard();
     }
 
     setState((current) => {
       if (current.activeArea.type === "hand") {
-        if (current.handTiles.length >= getHandLimit(current.melds)) {
+        if (getSelectedTileTotal(current) >= 13 || current.handTiles.length >= getHandLimit(current.melds)) {
           return current;
         }
 
@@ -211,7 +233,18 @@ export function CalculatorClient() {
 
         if (!isChiSequence(nextPending)) {
           setPendingChiTiles([]);
-          return current;
+          if (isMobileViewport()) {
+            closeMobileKeyboard();
+          }
+          return {
+            ...current,
+            pendingMeldType: null,
+            activeArea: { type: "hand" },
+          };
+        }
+
+        if (isMobileViewport()) {
+          closeMobileKeyboard();
         }
 
         setPendingChiTiles([]);
@@ -319,6 +352,8 @@ export function CalculatorClient() {
               melds={state.melds}
               activeMeldId={activeMeldId}
               pendingMeldType={state.pendingMeldType}
+              pendingChiTiles={pendingChiTiles}
+              selectedTileTotal={selectedTileTotal}
               onSelectMeld={(meldId) => activateArea({ type: "meld", meldId })}
               onCreateMeld={createMeld}
               onClearPending={() => {
@@ -374,7 +409,7 @@ export function CalculatorClient() {
                 })
               }
             />
-            <ResultPanel summary={summary} />
+            <ResultPanel summary={summary} alerts={resultAlerts} />
           </div>
         </div>
 

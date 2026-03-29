@@ -97,6 +97,7 @@ export type HandDivision = {
   closedGroups: MeldGroup[];
   groups: MeldGroup[];
   winningTile: TileCode;
+  winningTarget: { kind: "pair" } | { kind: "group"; index: number };
 };
 
 export const TILE_ORDER: TileCode[] = [
@@ -150,8 +151,8 @@ export const DEFAULT_STATE: CalculatorState = {
   handTiles: [],
   melds: [],
   winningTile: null,
-  doraIndicators: [null],
-  uraDoraIndicators: [null],
+  doraIndicators: [null, null, null, null, null],
+  uraDoraIndicators: [null, null, null, null, null],
   activeArea: { type: "hand" },
   pendingMeldType: null,
   conditions: {

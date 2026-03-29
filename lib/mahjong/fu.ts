@@ -1,3 +1,4 @@
+import { isMenzenHand } from "@/lib/mahjong/state";
 import type { CalculatorState, FuLine, HandDivision, MeldGroup, TileCode } from "@/lib/mahjong/types";
 
 function isHonor(tile: TileCode) {
@@ -29,7 +30,7 @@ function isValuePair(tile: TileCode, state: CalculatorState) {
   return result;
 }
 
-function getMeldFu(group: MeldGroup) {
+function getMeldFu(group: MeldGroup, treatAsOpen = group.open) {
   if (group.kind === "sequence") {
     return 0;
   }
@@ -40,13 +41,13 @@ function getMeldFu(group: MeldGroup) {
   const baseTile = group.tiles[0];
   const yaochu = isTerminalOrHonor(baseTile);
   if (group.kind === "triplet") {
-    if (group.open) {
+    if (treatAsOpen) {
       return yaochu ? 4 : 2;
     }
     return yaochu ? 8 : 4;
   }
 
-  if (group.open) {
+  if (treatAsOpen) {
     return yaochu ? 16 : 8;
   }
   return yaochu ? 32 : 16;
@@ -54,15 +55,12 @@ function getMeldFu(group: MeldGroup) {
 
 function getWaitFu(division: HandDivision) {
   const winningTile = division.winningTile;
-  if (division.pair[0] === winningTile) {
+  if (division.winningTarget.kind === "pair") {
     return 2;
   }
 
-  for (const group of division.closedGroups) {
-    if (group.kind !== "sequence" || !group.tiles.includes(winningTile)) {
-      continue;
-    }
-
+  const group = division.closedGroups[division.winningTarget.index];
+  if (group.kind === "sequence") {
     const values = group.tiles.map((tile) => Number(tile[0])).sort((a, b) => a - b);
     if (winningTile === group.tiles[1]) {
       return 2;
@@ -95,7 +93,7 @@ export function calculateFu(state: CalculatorState, division: HandDivision | nul
   }
 
   const lines: FuLine[] = [{ label: "底符", value: 20 }];
-  const isMenzen = state.melds.length === 0;
+  const isMenzen = isMenzenHand(state.melds);
   const isPinfu = yakuNames.has("平和");
 
   if (state.conditions.winningMethod === "ron" && isMenzen) {
@@ -114,11 +112,16 @@ export function calculateFu(state: CalculatorState, division: HandDivision | nul
     }
   }
 
+  const winningGroup =
+    division.winningTarget.kind === "group" ? division.closedGroups[division.winningTarget.index] : null;
+
   for (const group of division.groups) {
-    const value = getMeldFu(group);
+    const treatAsOpen =
+      group.open || (state.conditions.winningMethod === "ron" && winningGroup === group && group.kind === "triplet");
+    const value = getMeldFu(group, treatAsOpen);
     if (value > 0) {
       lines.push({
-        label: `${group.open ? "明" : "暗"}${group.kind === "kan" ? "杠" : "刻"}(${isTerminalOrHonor(group.tiles[0]) ? "幺九" : "中张"})`,
+        label: `${treatAsOpen ? "明" : "暗"}${group.kind === "kan" ? "杠" : "刻"}(${isTerminalOrHonor(group.tiles[0]) ? "幺九" : "中张"})`,
         value,
       });
     }

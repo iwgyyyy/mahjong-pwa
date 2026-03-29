@@ -30,6 +30,16 @@ export function countTiles(tiles: TileCode[]) {
   return counts;
 }
 
+function countsEqual(left: TileCounts, right: TileCounts) {
+  for (const tile of TILE_ORDER) {
+    if ((left.get(tile) ?? 0) !== (right.get(tile) ?? 0)) {
+      return false;
+    }
+  }
+
+  return true;
+}
+
 export function meldToGroup(meld: Meld): MeldGroup {
   if (meld.type === "chi") {
     return { kind: "sequence", tiles: sortTiles(meld.tiles), open: true, source: "meld" };
@@ -87,7 +97,7 @@ function takeSequence(counts: TileCounts, tile: TileCode) {
 }
 
 function findFirstTile(counts: TileCounts) {
-  return [...counts.entries()].find(([, count]) => count > 0)?.[0] ?? null;
+  return TILE_ORDER.find((tile) => (counts.get(tile) ?? 0) > 0) ?? null;
 }
 
 function normalizeCounts(counts: TileCounts) {
@@ -161,9 +171,15 @@ export function isKokushi(tiles: TileCode[]) {
   return terminalsAndHonors.size === counts.size && [...counts.values()].some((count) => count === 2);
 }
 
-export function divideClosedHand(closedTiles: TileCode[], winningTile: TileCode, melds: Meld[]) {
+export function divideClosedHand(
+  handTiles: TileCode[],
+  closedTiles: TileCode[],
+  winningTile: TileCode,
+  melds: Meld[]
+) {
   const divisions: HandDivision[] = [];
   const counts = countTiles(closedTiles);
+  const handCounts = countTiles(handTiles);
   const openGroups = melds.map(meldToGroup);
 
   for (const [tile, count] of counts.entries()) {
@@ -181,11 +197,44 @@ export function divideClosedHand(closedTiles: TileCode[], winningTile: TileCode,
         continue;
       }
 
-      divisions.push({
-        pair,
-        closedGroups: candidate,
-        groups: [...candidate, ...openGroups],
-        winningTile,
+      const fullGroups = [...candidate, ...openGroups];
+      const pairCounts = countTiles(pair);
+      if ((pairCounts.get(winningTile) ?? 0) > 0) {
+        const pairRemainder = cloneCounts(counts);
+        pairRemainder.set(winningTile, (pairRemainder.get(winningTile) ?? 0) - 1);
+        normalizeCounts(pairRemainder);
+
+        if (countsEqual(pairRemainder, handCounts)) {
+          divisions.push({
+            pair,
+            closedGroups: candidate,
+            groups: fullGroups,
+            winningTile,
+            winningTarget: { kind: "pair" },
+          });
+        }
+      }
+
+      candidate.forEach((group, index) => {
+        if (!group.tiles.includes(winningTile)) {
+          return;
+        }
+
+        const groupRemainder = cloneCounts(counts);
+        groupRemainder.set(winningTile, (groupRemainder.get(winningTile) ?? 0) - 1);
+        normalizeCounts(groupRemainder);
+
+        if (!countsEqual(groupRemainder, handCounts)) {
+          return;
+        }
+
+        divisions.push({
+          pair,
+          closedGroups: candidate,
+          groups: fullGroups,
+          winningTile,
+          winningTarget: { kind: "group", index },
+        });
       });
     }
   }

@@ -1,3 +1,4 @@
+import { isMenzenHand } from "@/lib/mahjong/state";
 import type { CalculatorState, HandDivision, MeldGroup, TileCode, YakuLine } from "@/lib/mahjong/types";
 
 type EvaluationContext = {
@@ -36,15 +37,12 @@ function isValuePair(tile: TileCode, state: CalculatorState) {
 
 function getWaitType(division: HandDivision): "ryanmen" | "kanchan" | "penchan" | "tanki" | "shanpon" {
   const tile = division.winningTile;
-  if (division.pair[0] === tile) {
+  if (division.winningTarget.kind === "pair") {
     return "tanki";
   }
 
-  for (const group of division.closedGroups) {
-    if (group.kind !== "sequence" || !group.tiles.includes(tile)) {
-      continue;
-    }
-
+  const group = division.closedGroups[division.winningTarget.index];
+  if (group.kind === "sequence") {
     const values = group.tiles.map((part) => Number(part[0])).sort((a, b) => a - b);
     if (tile === group.tiles[1]) {
       return "kanchan";
@@ -126,7 +124,7 @@ function countSequences(groups: MeldGroup[], target: string) {
 export function evaluateYaku(ctx: EvaluationContext) {
   const yaku: YakuLine[] = [];
   const { special, winningMethod } = ctx.state.conditions;
-  const isMenzen = ctx.state.melds.length === 0;
+  const isMenzen = isMenzenHand(ctx.state.melds);
   const groups = ctx.division?.groups ?? [];
   const tiles = allTiles(ctx);
 
@@ -290,12 +288,17 @@ export function evaluateYaku(ctx: EvaluationContext) {
       yaku.push({ name: "对对和", han: 2 });
     }
 
+    const winningGroup =
+      ctx.division.winningTarget.kind === "group"
+        ? ctx.division.closedGroups[ctx.division.winningTarget.index]
+        : null;
+
     const concealedTriplets = groups.filter((group) => {
       if (group.kind !== "triplet" && group.kind !== "kan") {
         return false;
       }
       if (!group.open) {
-        if (winningMethod === "ron" && group.tiles.every((tile) => tile === ctx.division?.winningTile)) {
+        if (winningMethod === "ron" && winningGroup === group && group.kind === "triplet") {
           return false;
         }
         return true;

@@ -1,14 +1,21 @@
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { Separator } from "@/components/ui/separator";
 import type { CalculationSummary } from "@/lib/mahjong/types";
 
-type ResultPanelProps = {
-  summary: CalculationSummary;
+type ResultAlert = {
+  title: string;
+  description: string;
 };
 
-export function ResultPanel({ summary }: ResultPanelProps) {
+type ResultPanelProps = {
+  summary: CalculationSummary;
+  alerts: ResultAlert[];
+};
+
+export function ResultPanel({ summary, alerts }: ResultPanelProps) {
   if (summary.status === "incomplete") {
     return (
       <Card className="panel-surface min-w-0">
@@ -16,7 +23,18 @@ export function ResultPanel({ summary }: ResultPanelProps) {
           <CardTitle>计算结果</CardTitle>
           <CardDescription>输入完整后自动计算，无需手动点击按钮。</CardDescription>
         </CardHeader>
-        <CardContent className="pt-4 text-sm text-muted-foreground">{summary.message}</CardContent>
+        <CardContent className="flex flex-col gap-3 pt-4">
+          {alerts.map((item) => (
+            <Alert key={item.title}>
+              <AlertTitle>{item.title}</AlertTitle>
+              <AlertDescription>{item.description}</AlertDescription>
+            </Alert>
+          ))}
+          <Alert>
+            <AlertTitle>等待计算</AlertTitle>
+            <AlertDescription>{summary.message}</AlertDescription>
+          </Alert>
+        </CardContent>
       </Card>
     );
   }
@@ -32,13 +50,23 @@ export function ResultPanel({ summary }: ResultPanelProps) {
           <Badge className="max-w-full whitespace-normal break-words">{summary.pointsLabel}</Badge>
         </div>
       </CardHeader>
-      <CardContent className="space-y-4 pt-4">
-        <div className="space-y-2">
+      <CardContent className="flex flex-col gap-4 pt-4">
+        {alerts.map((item) => (
+          <Alert key={item.title}>
+            <AlertTitle>{item.title}</AlertTitle>
+            <AlertDescription>{item.description}</AlertDescription>
+          </Alert>
+        ))}
+
+        <div className="flex flex-col gap-2">
           <p className="text-sm font-medium">役种</p>
           {summary.yaku.length === 0 ? (
-            <p className="text-sm text-muted-foreground">当前只检测到手牌完成状态，还没有命中场况类番种。</p>
+            <Alert>
+              <AlertTitle>役种提示</AlertTitle>
+              <AlertDescription>当前只检测到手牌完成状态，还没有命中场况类番种。</AlertDescription>
+            </Alert>
           ) : (
-            <div className="space-y-2">
+            <div className="flex flex-col gap-2">
               {summary.yaku.map((item) => (
                 <div key={item.name} className="flex items-center justify-between text-sm">
                   <span>{item.name}</span>
@@ -62,7 +90,7 @@ export function ResultPanel({ summary }: ResultPanelProps) {
           <CollapsibleTrigger className="text-sm font-medium underline-offset-4 hover:underline">
             展开符数详情
           </CollapsibleTrigger>
-          <CollapsibleContent className="mt-3 space-y-2">
+          <CollapsibleContent className="mt-3 flex flex-col gap-2">
             {summary.fuBreakdown.map((line) => (
               <div key={line.label} className="flex items-center justify-between text-sm text-muted-foreground">
                 <span>{line.label}</span>
@@ -72,9 +100,10 @@ export function ResultPanel({ summary }: ResultPanelProps) {
           </CollapsibleContent>
         </Collapsible>
 
-        <div className="rounded-2xl border border-dashed border-border p-3 text-sm text-muted-foreground">
-          {summary.note}
-        </div>
+        <Alert>
+          <AlertTitle>说明</AlertTitle>
+          <AlertDescription>{summary.note}</AlertDescription>
+        </Alert>
       </CardContent>
     </Card>
   );

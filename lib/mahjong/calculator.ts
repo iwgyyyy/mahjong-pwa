@@ -1,3 +1,4 @@
+import { normalizeCalculatorState } from "@/lib/mahjong/state";
 import { calculateFu } from "@/lib/mahjong/fu";
 import { divideClosedHand, isChiitoitsu, isKokushi } from "@/lib/mahjong/parser";
 import { getBasicPoints, formatPoints, getScoreTitle } from "@/lib/mahjong/score";
@@ -16,8 +17,12 @@ function getKanCount(melds: Meld[]) {
   return melds.filter((meld) => meld.type === "open-kan" || meld.type === "closed-kan").length;
 }
 
+export function getSelectedTileTotal(state: Pick<CalculatorState, "handTiles" | "melds">) {
+  return state.handTiles.length + state.melds.length * 3;
+}
+
 export function getHandLimit(melds: Meld[]) {
-  return 13 - melds.length * 3 - getKanCount(melds);
+  return 13 - melds.length * 3;
 }
 
 export function getUsedTileCounts(state: CalculatorState) {
@@ -121,51 +126,59 @@ type Candidate = {
 };
 
 export function buildCalculationSummary(state: CalculatorState): CalculationSummary {
-  const handLimit = getHandLimit(state.melds);
+  const normalizedState = normalizeCalculatorState(state);
+  const handLimit = getHandLimit(normalizedState.melds);
 
-  if (getDisplayedHandLength(state) !== handLimit) {
+  if (getDisplayedHandLength(normalizedState) !== handLimit) {
     return {
       status: "incomplete",
-      message: `门前手牌还差 ${Math.max(handLimit - state.handTiles.length, 0)} 张，当前上限 ${handLimit} 张。`,
+      message: `门前手牌还差 ${Math.max(handLimit - normalizedState.handTiles.length, 0)} 张，当前上限 ${handLimit} 张。`,
     };
   }
 
-  if (!state.winningTile) {
+  if (!normalizedState.winningTile) {
     return {
       status: "incomplete",
       message: "请选择和了牌，结果区才会开始计算。",
     };
   }
 
-  const closedTiles = [...state.handTiles, state.winningTile];
-  if (closedTiles.length + state.melds.reduce((sum, meld) => sum + meld.tiles.length, 0) !== 14) {
+  const closedTiles = [...normalizedState.handTiles, normalizedState.winningTile];
+  const totalTileCount = closedTiles.length + normalizedState.melds.reduce((sum, meld) => sum + meld.tiles.length, 0);
+  const expectedTileCount = 14 + getKanCount(normalizedState.melds);
+  if (totalTileCount !== expectedTileCount) {
     return {
       status: "incomplete",
-      message: "当前总牌数不是 14 张，无法完成和牌计算。",
+      message: `当前总牌数是 ${totalTileCount} 张，含杠手牌应为 ${expectedTileCount} 张，无法完成和牌计算。`,
     };
   }
 
-  const kokushi = isKokushi(closedTiles) && state.melds.length === 0;
-  const chiitoi = isChiitoitsu(closedTiles) && state.melds.length === 0;
-  const divisions = divideClosedHand(closedTiles, state.winningTile, state.melds);
+  const kokushi = isKokushi(closedTiles) && normalizedState.melds.length === 0;
+  const chiitoi = isChiitoitsu(closedTiles) && normalizedState.melds.length === 0;
+  const divisions = divideClosedHand(
+    normalizedState.handTiles,
+    closedTiles,
+    normalizedState.winningTile,
+    normalizedState.melds
+  );
 
   const candidates: Candidate[] = [];
-  const doraLines = getDoraLines(state, closedTiles);
+  const doraLines = getDoraLines(normalizedState, closedTiles);
   const doraHan = totalHan(doraLines);
 
   if (kokushi) {
     const yaku = evaluateYaku({
-      state,
+      state: normalizedState,
       division: null,
       closedTiles,
       isChiitoitsu: false,
       isKokushi: true,
     });
-    const han = totalHan(yaku) + doraHan;
+    const han = totalHan(yaku);
     const basicPoints = getBasicPoints(han, 0);
     candidates.push({
       division: null,
-      yaku: [...yaku, ...doraLines],
+      yaku,
       han,
       fu: 0,
       fuBreakdown: [],
@@ -175,7 +188,7 @@ export function buildCalculationSummary(state: CalculatorState): CalculationSumm
 
   if (chiitoi) {
     const yaku = evaluateYaku({
-      state,
+      state: normalizedState,
       division: null,
       closedTiles,
       isChiitoitsu: true,
@@ -183,12 +196,13 @@ export function buildCalculationSummary(state: CalculatorState): CalculationSumm
     });
     const baseHan = totalHan(yaku);
     if (baseHan > 0) {
-      const han = baseHan + doraHan;
-      const fuResult = calculateFu(state, null, true, new Set(yaku.map((line) => line.name)));
+      const yakuman = yaku.some((line) => line.yakuman);
+      const han = yakuman ? baseHan : baseHan + doraHan;
+      const fuResult = calculateFu(normalizedState, null, true, new Set(yaku.map((line) => line.name)));
       const basicPoints = getBasicPoints(han, fuResult.fu);
       candidates.push({
         division: null,
-        yaku: [...yaku, ...doraLines],
+        yaku: yakuman ? yaku : [...yaku, ...doraLines],
         han,
         fu: fuResult.fu,
         fuBreakdown: fuResult.breakdown,
@@ -199,7 +213,7 @@ export function buildCalculationSummary(state: CalculatorState): CalculationSumm
 
   for (const division of divisions) {
     const yaku = evaluateYaku({
-      state,
+      state: normalizedState,
       division,
       closedTiles,
       isChiitoitsu: false,
@@ -209,13 +223,14 @@ export function buildCalculationSummary(state: CalculatorState): CalculationSumm
     if (baseHan <= 0) {
       continue;
     }
-    const han = baseHan + doraHan;
+    const yakuman = yaku.some((line) => line.yakuman);
+    const han = yakuman ? baseHan : baseHan + doraHan;
 
-    const fuResult = calculateFu(state, division, false, new Set(yaku.map((line) => line.name)));
+    const fuResult = calculateFu(normalizedState, division, false, new Set(yaku.map((line) => line.name)));
     const basicPoints = getBasicPoints(han, fuResult.fu);
     candidates.push({
       division,
-      yaku: [...yaku, ...doraLines],
+      yaku: yakuman ? yaku : [...yaku, ...doraLines],
       han,
       fu: fuResult.fu,
       fuBreakdown: fuResult.breakdown,
@@ -232,8 +247,8 @@ export function buildCalculationSummary(state: CalculatorState): CalculationSumm
 
   candidates.sort(compareCandidates);
   const best = candidates[0];
-  const isDealer = state.conditions.isDealer;
-  const subtitle = `${isDealer ? "庄家" : "闲家"}${state.conditions.winningMethod === "tsumo" ? "自摸" : "荣和"} · ${state.conditions.honba} 本场`;
+  const isDealer = normalizedState.conditions.isDealer;
+  const subtitle = `${isDealer ? "庄家" : "闲家"}${normalizedState.conditions.winningMethod === "tsumo" ? "自摸" : "荣和"} · ${normalizedState.conditions.honba} 本场`;
   const title = getScoreTitle(best.han, best.basicPoints);
 
   return {
@@ -243,7 +258,12 @@ export function buildCalculationSummary(state: CalculatorState): CalculationSumm
     han: best.han,
     fu: best.fu,
     basicPoints: best.basicPoints,
-    pointsLabel: formatPoints(best.basicPoints, isDealer, state.conditions.winningMethod, state.conditions.honba),
+    pointsLabel: formatPoints(
+      best.basicPoints,
+      isDealer,
+      normalizedState.conditions.winningMethod,
+      normalizedState.conditions.honba
+    ),
     yaku: best.yaku,
     fuBreakdown: best.fuBreakdown,
     note:
