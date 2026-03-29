@@ -1,0 +1,100 @@
+<h2>页面布局方案</h2>
+<p class="subtitle">番符计算器的整体交互结构，哪种更适合线下快速使用？</p>
+
+<div class="cards">
+  <div class="card" data-choice="a" onclick="toggleSelect(this)">
+    <div class="card-image">
+      <div style="background: #fff; border-radius: 12px; padding: 16px; color: #111; font-family: system-ui; border: 1px solid #e5e7eb; font-size: 12px;">
+        <div style="background: #f9fafb; border: 1px solid #e5e7eb; border-radius: 8px; padding: 8px; margin-bottom: 8px;">
+          <div style="color: #6b7280; font-size: 10px; margin-bottom: 4px;">场风/自风/条件开关</div>
+          <div style="display: flex; gap: 4px;">
+            <span style="background: #111; color: #fff; padding: 2px 8px; border-radius: 4px; font-size: 10px;">东场</span>
+            <span style="background: #f3f4f6; padding: 2px 8px; border-radius: 4px; font-size: 10px;">南家</span>
+            <span style="background: #f3f4f6; padding: 2px 8px; border-radius: 4px; font-size: 10px;">立直</span>
+            <span style="background: #f3f4f6; padding: 2px 8px; border-radius: 4px; font-size: 10px;">一发</span>
+          </div>
+        </div>
+        <div style="background: #f9fafb; border: 1px solid #e5e7eb; border-radius: 8px; padding: 8px; margin-bottom: 8px;">
+          <div style="color: #6b7280; font-size: 10px; margin-bottom: 4px;">手牌区 (门前)</div>
+          <div style="display: flex; gap: 2px;">
+            <div style="width: 24px; height: 32px; background: #fff; border: 1px solid #d1d5db; border-radius: 3px; display:flex; align-items:center; justify-content:center; font-size: 10px;">🀇</div>
+            <div style="width: 24px; height: 32px; background: #fff; border: 1px solid #d1d5db; border-radius: 3px; display:flex; align-items:center; justify-content:center; font-size: 10px;">🀈</div>
+            <div style="width: 24px; height: 32px; background: #fff; border: 1px solid #d1d5db; border-radius: 3px; display:flex; align-items:center; justify-content:center; font-size: 10px;">🀉</div>
+            <div style="width: 24px; height: 32px; border: 1px dashed #d1d5db; border-radius: 3px;"></div>
+            <div style="width: 24px; height: 32px; border: 1px dashed #d1d5db; border-radius: 3px;"></div>
+          </div>
+        </div>
+        <div style="background: #f9fafb; border: 1px solid #e5e7eb; border-radius: 8px; padding: 8px; margin-bottom: 8px;">
+          <div style="color: #6b7280; font-size: 10px; margin-bottom: 4px;">副露区</div>
+          <div style="display: flex; gap: 8px; align-items: center;">
+            <div style="display: flex; gap: 1px;">
+              <div style="width: 20px; height: 28px; background: #dbeafe; border: 1px solid #93c5fd; border-radius: 2px; font-size: 8px; display:flex; align-items:center; justify-content:center;">碰</div>
+              <div style="width: 20px; height: 28px; background: #dbeafe; border: 1px solid #93c5fd; border-radius: 2px;"></div>
+              <div style="width: 20px; height: 28px; background: #dbeafe; border: 1px solid #93c5fd; border-radius: 2px;"></div>
+            </div>
+            <span style="background: #f3f4f6; padding: 2px 6px; border-radius: 4px; font-size: 10px; border: 1px dashed #d1d5db;">+ 添加副露</span>
+          </div>
+        </div>
+        <div style="background: #f9fafb; border: 1px solid #e5e7eb; border-radius: 8px; padding: 8px; margin-bottom: 8px;">
+          <div style="color: #6b7280; font-size: 10px; margin-bottom: 4px;">和了牌 + 自摸/荣和</div>
+          <div style="display: flex; gap: 8px; align-items: center;">
+            <div style="width: 24px; height: 32px; background: #fef3c7; border: 1px solid #f59e0b; border-radius: 3px; display:flex; align-items:center; justify-content:center; font-size: 10px;">🀉</div>
+            <span style="background: #111; color: #fff; padding: 2px 8px; border-radius: 4px; font-size: 10px;">荣和</span>
+            <span style="background: #f3f4f6; padding: 2px 8px; border-radius: 4px; font-size: 10px;">自摸</span>
+          </div>
+        </div>
+        <div style="display: flex; gap: 2px; flex-wrap: wrap; background: #f9fafb; border: 1px solid #e5e7eb; border-radius: 8px; padding: 8px; margin-bottom: 8px;">
+          <div style="color: #6b7280; font-size: 10px; width: 100%; margin-bottom: 2px;">选牌键盘 (始终可见)</div>
+          <div style="width: 20px; height: 24px; background: #fff; border: 1px solid #d1d5db; border-radius: 2px; font-size: 8px; display:flex; align-items:center; justify-content:center;">1m</div>
+          <div style="width: 20px; height: 24px; background: #fff; border: 1px solid #d1d5db; border-radius: 2px; font-size: 8px; display:flex; align-items:center; justify-content:center;">2m</div>
+          <div style="width: 20px; height: 24px; background: #fff; border: 1px solid #d1d5db; border-radius: 2px; font-size: 8px; display:flex; align-items:center; justify-content:center;">3m</div>
+          <div style="width: 20px; height: 24px; background: #fff; border: 1px solid #d1d5db; border-radius: 2px; font-size: 8px; display:flex; align-items:center; justify-content:center;">...</div>
+        </div>
+        <div style="background: #111; color: #fff; border-radius: 8px; padding: 8px; text-align: center;">
+          <div style="font-size: 10px;">⬇ 计算结果在下方展开</div>
+        </div>
+      </div>
+    </div>
+    <div class="card-body">
+      <h3>A. 单页长滚动 (推荐)</h3>
+      <p>所有内容在一页上下排列：条件 → 手牌 → 副露 → 和了牌 → 选牌键盘 → 计算结果。滚动操作，移动端友好。</p>
+      <div class="pros-cons">
+        <div class="pros"><h4>Pros</h4><ul><li>一目了然，无隐藏状态</li><li>移动端自然交互</li><li>实现简单</li></ul></div>
+        <div class="cons"><h4>Cons</h4><ul><li>内容多时需要滚动</li></ul></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card" data-choice="b" onclick="toggleSelect(this)">
+    <div class="card-image">
+      <div style="background: #fff; border-radius: 12px; padding: 16px; color: #111; font-family: system-ui; border: 1px solid #e5e7eb; font-size: 12px;">
+        <div style="background: #f9fafb; border: 1px solid #e5e7eb; border-radius: 8px; padding: 8px; margin-bottom: 8px; min-height: 120px;">
+          <div style="display: flex; gap: 8px; margin-bottom: 8px; border-bottom: 1px solid #e5e7eb; padding-bottom: 6px;">
+            <span style="font-size: 10px; padding: 2px 8px; border-bottom: 2px solid #111;">手牌</span>
+            <span style="font-size: 10px; padding: 2px 8px; color: #6b7280;">副露</span>
+            <span style="font-size: 10px; padding: 2px 8px; color: #6b7280;">条件</span>
+          </div>
+          <div style="color: #6b7280; font-size: 10px; text-align: center; padding: 20px;">当前 Tab 的内容区域</div>
+        </div>
+        <div style="display: flex; gap: 2px; flex-wrap: wrap; background: #f9fafb; border: 1px solid #e5e7eb; border-radius: 8px; padding: 8px; margin-bottom: 8px;">
+          <div style="color: #6b7280; font-size: 10px; width: 100%; margin-bottom: 2px;">选牌键盘</div>
+          <div style="width: 20px; height: 24px; background: #fff; border: 1px solid #d1d5db; border-radius: 2px; font-size: 8px; display:flex; align-items:center; justify-content:center;">1m</div>
+          <div style="width: 20px; height: 24px; background: #fff; border: 1px solid #d1d5db; border-radius: 2px; font-size: 8px; display:flex; align-items:center; justify-content:center;">2m</div>
+          <div style="width: 20px; height: 24px; background: #fff; border: 1px solid #d1d5db; border-radius: 2px; font-size: 8px; display:flex; align-items:center; justify-content:center;">3m</div>
+          <div style="width: 20px; height: 24px; background: #fff; border: 1px solid #d1d5db; border-radius: 2px; font-size: 8px; display:flex; align-items:center; justify-content:center;">...</div>
+        </div>
+        <div style="background: #111; color: #fff; border-radius: 8px; padding: 8px; text-align: center;">
+          <div style="font-size: 14px; font-weight: bold;">计算</div>
+        </div>
+      </div>
+    </div>
+    <div class="card-body">
+      <h3>B. Tab 分区</h3>
+      <p>用 Tab 切换手牌/副露/条件三个面板，选牌键盘始终在底部。页面更紧凑，但需要切换。</p>
+      <div class="pros-cons">
+        <div class="pros"><h4>Pros</h4><ul><li>页面紧凑，无需滚动</li><li>每个区域空间充足</li></ul></div>
+        <div class="cons"><h4>Cons</h4><ul><li>切换有认知负担</li><li>无法同时看到所有状态</li></ul></div>
+      </div>
+    </div>
+  </div>
+</div>
