@@ -44,8 +44,8 @@ export default function Home() {
                 </div>
               ))}
             </div>
-            <div>
-              <Button asChild size="lg">
+            <div className="flex justify-end">
+              <Button asChild size="lg" className="max-md:w-full">
                 <Link href="/calculator">进入计算器</Link>
               </Button>
             </div>
@@ -74,8 +74,8 @@ export default function Home() {
                 </div>
               ))}
             </div>
-            <div>
-              <Button asChild size="lg">
+            <div className="flex justify-end">
+              <Button asChild size="lg" className="max-md:w-full">
                 <Link href="/pt">打开 PT 计算器</Link>
               </Button>
             </div>
