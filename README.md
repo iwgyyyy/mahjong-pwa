@@ -1,36 +1,94 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Mahjong PWA
 
-## Getting Started
+一个基于 Next.js 16 的立直麻将工具站，当前包含番符计算、PT 计算和规则文档三部分。
 
-First, run the development server:
+线上地址：
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+```text
+https://mahjong.onedigi.cn
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## 功能
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+- `/calculator`
+  立直麻将番符计算器。支持场况条件、门前手牌、副露、和了牌、宝牌指示牌、里宝牌指示牌录入，并实时计算役种、番数、符数和基础点。
+- `/pt`
+  日麻 PT 计算器。输入四家终局点数后，按常见的 `25000 起点 / 30000 返点 / 20-10 马` 规则换算 PT，也支持修改规则参数。
+- `/docs`
+  立直麻将规则文档。包含基础规则、鸣牌与流局、振听、符数与点数快捷表，以及常见役种 / 役满图例。
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## 技术栈
 
-## Learn More
+- Next.js 16 App Router
+- React 19
+- TypeScript
+- Tailwind CSS v4
+- shadcn/ui
+- react-hook-form + zod
+- next-themes
 
-To learn more about Next.js, take a look at the following resources:
+## 本地开发
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+项目使用 `bun` 作为包管理器。
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+安装依赖：
 
-## Deploy on Vercel
+```bash
+bun install
+```
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+启动开发环境：
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+```bash
+bun run dev
+```
+
+访问：
+
+```text
+http://localhost:3000
+```
+
+## 常用命令
+
+```bash
+bun run dev
+bun run build
+bun run start
+bun run lint
+npx tsc --noEmit
+```
+
+## 项目结构
+
+```text
+app/
+  page.tsx              首页
+  calculator/page.tsx   番符计算器
+  pt/page.tsx           PT 计算器
+  docs/page.tsx         规则文档
+
+components/
+  calculator/           计算器页面组件
+  docs/                 文档图片与放大查看组件
+  pt/                   PT 页面组件
+  providers/            全局 provider
+  ui/                   shadcn/ui 组件
+
+lib/
+  docs/                 文档数据
+  mahjong/              麻将计算逻辑
+```
+
+## 当前特性
+
+- 统一牌池校验，手牌、副露、和了牌、宝牌、里宝共用剩余张数
+- 移动端抽屉式选牌键盘
+- 文档图片支持点击放大
+- 暗夜模式默认跟随系统主题
+
+## 注意事项
+
+- 这是前端工具项目，规则与点数逻辑以当前实现为准
+- 当前未包含赤宝牌计算
+- 浏览器安装型 PWA 能力还没有完整接入 `manifest` 和 `service worker`
