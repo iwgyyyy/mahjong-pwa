@@ -1,6 +1,8 @@
 export type RuleImage = {
   src: string;
   alt: string;
+  width?: number;
+  height?: number;
 };
 
 export type RuleItem = {
@@ -26,8 +28,8 @@ export const TILE_CATEGORIES = [
 ] as const;
 
 export const BASIC_IMAGES: RuleImage[] = [
-  { src: "/docs/type-mahjong.png", alt: "牌种示意" },
-  { src: "/docs/type-card.png", alt: "面子、搭子、雀头示意" },
+  { src: "/docs/type-mahjong.png", alt: "牌种示意", width: 1299, height: 765 },
+  { src: "/docs/type-card.png", alt: "面子、搭子、雀头示意", width: 1396, height: 756 },
 ];
 
 export const MELD_RULES = [
@@ -58,9 +60,9 @@ export const FURITEN_RULES = [
 ] as const;
 
 export const QUICK_REFERENCE_IMAGES: RuleImage[] = [
-  { src: "/docs/fu-calculate.png", alt: "符数计算表" },
-  { src: "/docs/score-dealer.png", alt: "庄家点数计算表" },
-  { src: "/docs/score-player.png", alt: "闲家点数计算表" },
+  { src: "/docs/fu-calculate.png", alt: "符数计算表", width: 1613, height: 908 },
+  { src: "/docs/score-dealer.png", alt: "庄家点数计算表", width: 1605, height: 910 },
+  { src: "/docs/score-player.png", alt: "闲家点数计算表", width: 1616, height: 898 },
 ] as const;
 
 export const YAKU_SECTIONS: RuleSection[] = [

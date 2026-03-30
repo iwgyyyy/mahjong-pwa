@@ -28,18 +28,32 @@ export function getHandLimit(melds: Meld[]) {
 export function getUsedTileCounts(state: CalculatorState) {
   const counts = new Map<TileCode, number>();
 
-  for (const tile of state.handTiles) {
+  function addTile(tile: TileCode | null) {
+    if (!tile) {
+      return;
+    }
+
     counts.set(tile, (counts.get(tile) ?? 0) + 1);
+  }
+
+  for (const tile of state.handTiles) {
+    addTile(tile);
   }
 
   for (const meld of state.melds) {
     for (const tile of meld.tiles) {
-      counts.set(tile, (counts.get(tile) ?? 0) + 1);
+      addTile(tile);
     }
   }
 
-  if (state.winningTile) {
-    counts.set(state.winningTile, (counts.get(state.winningTile) ?? 0) + 1);
+  addTile(state.winningTile);
+
+  for (const tile of state.doraIndicators) {
+    addTile(tile);
+  }
+
+  for (const tile of state.uraDoraIndicators) {
+    addTile(tile);
   }
 
   return counts;

@@ -25,29 +25,21 @@ const NAV_ITEMS = [
   { href: "#yaku", label: "役种 / 番种" },
 ] as const;
 
-function DocImage({ image }: { image: RuleImage }) {
+function DocImage({ image, loading = "lazy" }: { image: RuleImage; loading?: "eager" | "lazy" }) {
   return (
     <div className="overflow-hidden rounded-[1.5rem] border border-border/70 bg-background/80 p-3">
-      <div className="relative aspect-4/3 w-full overflow-hidden rounded-2xl bg-muted/40">
+      <div className="overflow-hidden rounded-2xl bg-muted/40">
         <ZoomableDocImage
           src={image.src}
           alt={image.alt}
-          fill
+          width={image.width ?? 1600}
+          height={image.height ?? 900}
           sizes="(max-width: 768px) 100vw, 50vw"
-          className="object-contain"
+          loading={loading}
+          className="h-auto w-full object-contain"
         />
       </div>
       <p className="mt-3 text-sm text-muted-foreground">{image.alt}</p>
-    </div>
-  );
-}
-
-function RuleGallery({ items }: { items: RuleImage[] }) {
-  return (
-    <div className="grid gap-4 md:grid-cols-2">
-      {items.map((image) => (
-        <DocImage key={image.src} image={image} />
-      ))}
     </div>
   );
 }
@@ -67,8 +59,8 @@ function YakuCard({ item }: { item: RuleItem }) {
                 <ZoomableDocImage
                   src={image.src}
                   alt={image.alt}
-                  width={800}
-                  height={240}
+                  width={1452}
+                  height={280}
                   sizes="(max-width: 1024px) 100vw, 50vw"
                   className="h-auto w-full object-contain"
                 />
@@ -135,15 +127,19 @@ export default function DocsPage() {
             </CardContent>
           </Card>
 
-          <Card className="panel-surface min-w-0">
-            <CardHeader>
-              <CardTitle>二、面子、搭子、雀头</CardTitle>
-              <CardDescription>把基础牌型先看清楚，后面拆牌和听牌判断会更直观。</CardDescription>
-            </CardHeader>
-            <CardContent className="grid gap-4">
-              <RuleGallery items={BASIC_IMAGES} />
-            </CardContent>
-          </Card>
+      <Card className="panel-surface min-w-0">
+        <CardHeader>
+          <CardTitle>二、面子、搭子、雀头</CardTitle>
+          <CardDescription>把基础牌型先看清楚，后面拆牌和听牌判断会更直观。</CardDescription>
+        </CardHeader>
+        <CardContent className="grid gap-4">
+          <div className="grid gap-4 md:grid-cols-2">
+            {BASIC_IMAGES.map((image, index) => (
+              <DocImage key={image.src} image={image} loading={index === 0 ? "eager" : "lazy"} />
+            ))}
+          </div>
+        </CardContent>
+      </Card>
         </section>
 
         <section id="meld" className="grid gap-6 xl:grid-cols-2">

@@ -62,6 +62,19 @@ export function CalculatorClient() {
   for (const [tile, count] of usedTileCounts) {
     remainingMap.set(tile, Math.max(0, 4 - count));
   }
+  const keyboardRemainingMap = new Map(remainingMap);
+
+  if (state.activeArea.type === "winning" && state.winningTile) {
+    keyboardRemainingMap.set(state.winningTile, (keyboardRemainingMap.get(state.winningTile) ?? 4) + 1);
+  }
+
+  if (state.activeArea.type === "dora") {
+    const indicators = state.activeArea.kind === "dora" ? state.doraIndicators : state.uraDoraIndicators;
+    const activeTile = indicators[state.activeArea.slotIndex];
+    if (activeTile) {
+      keyboardRemainingMap.set(activeTile, (keyboardRemainingMap.get(activeTile) ?? 4) + 1);
+    }
+  }
 
   const handLimit = getHandLimit(state.melds);
   const selectedTileTotal = getSelectedTileTotal(state);
@@ -378,7 +391,7 @@ export function CalculatorClient() {
             />
             <div className="hidden md:block">
               <TileKeyboard
-                remainingMap={remainingMap}
+                remainingMap={keyboardRemainingMap}
                 requiredCount={requiredTileCount}
                 onPickTile={handleTilePick}
               />
@@ -421,7 +434,7 @@ export function CalculatorClient() {
             </DrawerHeader>
             <div className="px-2 pb-[env(safe-area-inset-bottom)]">
               <TileKeyboard
-                remainingMap={remainingMap}
+                remainingMap={keyboardRemainingMap}
                 requiredCount={requiredTileCount}
                 onPickTile={handleTilePick}
                 mobile
